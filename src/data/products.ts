@@ -1,3 +1,5 @@
+export type StockStatus = 'in-stock' | 'out-of-stock' | 'upcoming';
+
 export interface Product {
   id: string;
   name: string;
@@ -12,7 +14,7 @@ export interface Product {
   ingredients?: string;
   howToUse?: string;
   shippingInfo?: string;
-  inStock: boolean;
+  stockStatus: StockStatus;
   rating?: number;
   reviewCount?: number;
   isBestseller?: boolean;
@@ -109,7 +111,7 @@ export const products: Product[] = [
     ingredients: 'Pure Palm Jaggery (100% Natural)',
     howToUse: 'Use as a sweetener in tea, milk, or enjoy as a healthy candy. Perfect for adding authentic Bengali flavor to your sweets.',
     shippingInfo: 'Ships within 2-3 business days. Packed fresh with moisture-proof packaging.',
-    inStock: true,
+    stockStatus: 'in-stock',
     rating: 4.8,
     reviewCount: 124,
     isBestseller: true,
@@ -127,7 +129,7 @@ export const products: Product[] = [
     ingredients: 'Raw Mango, Mustard Oil, Mustard Seeds, Fenugreek, Red Chili, Salt, Turmeric',
     howToUse: 'Perfect accompaniment with dal-rice, paratha, or any Indian meal.',
     shippingInfo: 'Ships within 2-3 business days in airtight glass jars.',
-    inStock: true,
+    stockStatus: 'in-stock',
     rating: 4.7,
     reviewCount: 89,
     isBestseller: true,
@@ -144,7 +146,7 @@ export const products: Product[] = [
     ingredients: 'Besan, Rice Flakes, Peanuts, Gram Dal, Spices, Salt, Mustard Oil',
     howToUse: 'Enjoy as a snack with chai or sprinkle over your favorite jhalmuri.',
     shippingInfo: 'Ships within 1-2 business days. Freshly packed.',
-    inStock: true,
+    stockStatus: 'in-stock',
     rating: 4.5,
     reviewCount: 67,
   },
@@ -161,7 +163,7 @@ export const products: Product[] = [
     ingredients: 'Fresh Chenna (Cottage Cheese), Nolen Gur (Date Palm Jaggery)',
     howToUse: 'Serve chilled as a dessert. Best consumed within 3 days.',
     shippingInfo: 'Special cold-chain shipping available. Orders ship same day if placed before 2 PM.',
-    inStock: true,
+    stockStatus: 'in-stock',
     rating: 4.9,
     reviewCount: 203,
     isBestseller: true,
@@ -180,7 +182,7 @@ export const products: Product[] = [
     ingredients: '100% Gobindobhog Rice',
     howToUse: 'Perfect for Bhog, Payesh, and Pulao. Wash and soak for 30 minutes before cooking.',
     shippingInfo: 'Ships within 2-3 business days.',
-    inStock: true,
+    stockStatus: 'in-stock',
     rating: 4.8,
     reviewCount: 156,
     isBestseller: true,
@@ -198,7 +200,7 @@ export const products: Product[] = [
     ingredients: '100% Pure Cow Milk Ghee',
     howToUse: 'Use for cooking, in sweets, or add to hot rice. Perfect for all Bengali recipes.',
     shippingInfo: 'Ships within 1-2 business days.',
-    inStock: true,
+    stockStatus: 'in-stock',
     rating: 4.9,
     reviewCount: 312,
     isBestseller: true,
@@ -215,7 +217,7 @@ export const products: Product[] = [
     ingredients: 'Natural herbs, Charcoal, Essential oils, Sandalwood powder',
     howToUse: 'Light the tip and let it burn for a few seconds, then blow out the flame.',
     shippingInfo: 'Ships within 1-2 business days.',
-    inStock: true,
+    stockStatus: 'in-stock',
   },
   {
     id: '8',
@@ -229,7 +231,7 @@ export const products: Product[] = [
     ingredients: 'Refined Flour, Cumin Seeds, Salt, Vegetable Oil',
     howToUse: 'Enjoy as a snack with tea or as a side with meals.',
     shippingInfo: 'Ships within 1-2 business days.',
-    inStock: true,
+    stockStatus: 'in-stock',
     rating: 4.4,
     reviewCount: 45,
   },
@@ -246,7 +248,7 @@ export const products: Product[] = [
     ingredients: 'Fresh Chenna, Sugar, Water, Cardamom',
     howToUse: 'Serve chilled or at room temperature. Best within 7 days of opening.',
     shippingInfo: 'Ships within 2-3 business days.',
-    inStock: true,
+    stockStatus: 'in-stock',
     rating: 4.7,
     reviewCount: 189,
     isBestseller: true,
@@ -263,7 +265,7 @@ export const products: Product[] = [
     ingredients: '100% Masoor Dal',
     howToUse: 'Wash and cook with water. Ready in 15-20 minutes.',
     shippingInfo: 'Ships within 1-2 business days.',
-    inStock: true,
+    stockStatus: 'out-of-stock',
     rating: 4.6,
     reviewCount: 78,
   },
@@ -279,7 +281,7 @@ export const products: Product[] = [
     ingredients: 'Mustard Seeds, Mango, Turmeric, Red Chili, Salt, Mustard Oil',
     howToUse: 'Perfect with fish fry, pakoras, or as a sandwich spread.',
     shippingInfo: 'Ships within 2-3 business days.',
-    inStock: true,
+    stockStatus: 'in-stock',
     rating: 4.8,
     reviewCount: 92,
   },
@@ -295,11 +297,59 @@ export const products: Product[] = [
     ingredients: 'Cumin, Coriander, Red Chili, Garam Masala, Turmeric, Dried Mango Powder',
     howToUse: 'Add 2 tbsp to boiled yellow peas, cook for 5 minutes.',
     shippingInfo: 'Ships within 1-2 business days.',
-    inStock: false,
+    stockStatus: 'out-of-stock',
+  },
+  // Upcoming products
+  {
+    id: '13',
+    name: 'Nolen Gur Ice Cream (500ml)',
+    slug: 'nolen-gur-ice-cream-500ml',
+    price: 350,
+    category: 'Sweets & Mishti',
+    categorySlug: 'sweets-mishti',
+    image: 'https://images.unsplash.com/photo-1501443762994-82bd5dace89a?w=600&h=600&fit=crop',
+    description: 'Creamy artisanal ice cream made with authentic Nolen Gur (Date Palm Jaggery). A winter special that brings the taste of Bengal in every scoop.',
+    ingredients: 'Fresh Cream, Milk, Nolen Gur, Sugar',
+    howToUse: 'Serve frozen. Best consumed within 2 weeks of purchase.',
+    shippingInfo: 'Special frozen shipping available. Coming soon!',
+    stockStatus: 'upcoming',
+    isNew: true,
+  },
+  {
+    id: '14',
+    name: 'Bengali Fish Pickle (250g)',
+    slug: 'bengali-fish-pickle-250g',
+    price: 299,
+    category: 'Snacks & Homemade Pickles',
+    categorySlug: 'snacks-homemade-pickles',
+    image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=600&h=600&fit=crop',
+    description: 'Traditional Bengali fish pickle made with fresh rohu fish, mustard oil, and aromatic spices. A rare delicacy from the heart of Bengal.',
+    ingredients: 'Rohu Fish, Mustard Oil, Panch Phoron, Red Chili, Turmeric, Salt',
+    howToUse: 'Enjoy with hot rice or as a side dish. Store in refrigerator.',
+    shippingInfo: 'Special packaging for extended freshness. Coming soon!',
+    stockStatus: 'upcoming',
+  },
+  {
+    id: '15',
+    name: 'Durga Puja Special Gift Box',
+    slug: 'durga-puja-special-gift-box',
+    price: 1499,
+    originalPrice: 1799,
+    category: 'Seasonal Specials',
+    categorySlug: 'seasonal-specials',
+    image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=600&h=600&fit=crop',
+    description: 'A curated gift box featuring the finest Bengali festive treats. Perfect for gifting during Durga Puja celebrations. Includes premium sweets, snacks, and puja essentials.',
+    ingredients: 'Assorted Bengali Sweets, Chanachur, Nimki, Dhoop Sticks, Sindoor',
+    howToUse: 'Perfect as a gift for family and friends during the festive season.',
+    shippingInfo: 'Pre-orders open soon. Limited edition boxes available.',
+    stockStatus: 'upcoming',
+    isNew: true,
   },
 ];
 
 export const bestsellers = products.filter((p) => p.isBestseller);
+
+export const upcomingProducts = products.filter((p) => p.stockStatus === 'upcoming');
 
 export const getProductBySlug = (slug: string): Product | undefined => {
   return products.find((p) => p.slug === slug);

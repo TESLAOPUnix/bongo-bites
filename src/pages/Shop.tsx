@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronDown, Grid3X3, List, SlidersHorizontal, X } from 'lucide-react';
+import { SlidersHorizontal, X } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import ProductCard from '@/components/products/ProductCard';
-import { products, categories, getProductsByCategory, getCategoryBySlug } from '@/data/products';
+import { products, categories, getProductsByCategory, getCategoryBySlug, StockStatus } from '@/data/products';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -21,11 +21,11 @@ type SortOption = 'newest' | 'price-low' | 'price-high' | 'bestseller';
 export default function Shop() {
   const { categorySlug } = useParams();
   const [sortBy, setSortBy] = useState<SortOption>('newest');
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, 2000]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     categorySlug ? [categorySlug] : []
   );
-  const [showInStockOnly, setShowInStockOnly] = useState(false);
+  const [selectedStockStatus, setSelectedStockStatus] = useState<StockStatus[]>([]);
 
   const category = categorySlug ? getCategoryBySlug(categorySlug) : null;
 
@@ -40,9 +40,9 @@ export default function Shop() {
     // Filter by price range
     result = result.filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1]);
 
-    // Filter by stock
-    if (showInStockOnly) {
-      result = result.filter((p) => p.inStock);
+    // Filter by stock status
+    if (selectedStockStatus.length > 0) {
+      result = result.filter((p) => selectedStockStatus.includes(p.stockStatus));
     }
 
     // Sort
@@ -62,7 +62,7 @@ export default function Shop() {
     }
 
     return result;
-  }, [categorySlug, sortBy, priceRange, selectedCategories, showInStockOnly]);
+  }, [categorySlug, sortBy, priceRange, selectedCategories, selectedStockStatus]);
 
   const toggleCategory = (slug: string) => {
     setSelectedCategories((prev) =>
@@ -70,14 +70,30 @@ export default function Shop() {
     );
   };
 
+  const toggleStockStatus = (status: StockStatus) => {
+    setSelectedStockStatus((prev) =>
+      prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
+    );
+  };
+
   const clearFilters = () => {
     setSelectedCategories([]);
-    setPriceRange([0, 1000]);
-    setShowInStockOnly(false);
+    setPriceRange([0, 2000]);
+    setSelectedStockStatus([]);
     setSortBy('newest');
   };
 
-  const hasActiveFilters = selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 1000 || showInStockOnly;
+  const hasActiveFilters = 
+    selectedCategories.length > 0 || 
+    priceRange[0] > 0 || 
+    priceRange[1] < 2000 || 
+    selectedStockStatus.length > 0;
+
+  const stockStatusLabels: Record<StockStatus, string> = {
+    'in-stock': 'In Stock',
+    'out-of-stock': 'Out of Stock',
+    'upcoming': 'Upcoming',
+  };
 
   const FilterContent = () => (
     <div className="space-y-6">
@@ -87,7 +103,7 @@ export default function Shop() {
         <Slider
           value={priceRange}
           onValueChange={setPriceRange}
-          max={1000}
+          max={2000}
           step={50}
           className="mb-4"
         />
@@ -120,10 +136,19 @@ export default function Shop() {
       {/* Availability */}
       <div className="filter-section">
         <h4 className="font-semibold mb-4">Availability</h4>
-        <label className="flex items-center gap-3 cursor-pointer">
-          <Checkbox checked={showInStockOnly} onCheckedChange={(checked) => setShowInStockOnly(!!checked)} />
-          <span className="text-sm">In Stock Only</span>
-        </label>
+        <div className="space-y-3">
+          {(['in-stock', 'out-of-stock', 'upcoming'] as StockStatus[]).map((status) => (
+            <label key={status} className="flex items-center gap-3 cursor-pointer group">
+              <Checkbox
+                checked={selectedStockStatus.includes(status)}
+                onCheckedChange={() => toggleStockStatus(status)}
+              />
+              <span className="text-sm group-hover:text-primary transition-colors">
+                {stockStatusLabels[status]}
+              </span>
+            </label>
+          ))}
+        </div>
       </div>
 
       {hasActiveFilters && (
@@ -187,7 +212,7 @@ export default function Shop() {
                       Filters
                       {hasActiveFilters && (
                         <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
-                          {selectedCategories.length + (showInStockOnly ? 1 : 0)}
+                          {selectedCategories.length + selectedStockStatus.length}
                         </span>
                       )}
                     </Button>
@@ -233,19 +258,26 @@ export default function Shop() {
                     </button>
                   ) : null;
                 })}
-                {(priceRange[0] > 0 || priceRange[1] < 1000) && (
+                {selectedStockStatus.map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => toggleStockStatus(status)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                      status === 'in-stock' 
+                        ? 'bg-success/10 text-success hover:bg-success/20'
+                        : status === 'upcoming'
+                        ? 'bg-accent/10 text-accent hover:bg-accent/20'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    }`}
+                  >
+                    {stockStatusLabels[status]}
+                    <X className="h-3 w-3" />
+                  </button>
+                ))}
+                {(priceRange[0] > 0 || priceRange[1] < 2000) && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm">
                     ₹{priceRange[0]} - ₹{priceRange[1]}
                   </span>
-                )}
-                {showInStockOnly && (
-                  <button
-                    onClick={() => setShowInStockOnly(false)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-success/10 text-success text-sm hover:bg-success/20 transition-colors"
-                  >
-                    In Stock
-                    <X className="h-3 w-3" />
-                  </button>
                 )}
               </div>
             )}
