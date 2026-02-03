@@ -1,8 +1,29 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Facebook, Instagram, Youtube } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Instagram, Youtube, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    setIsSubscribing(true);
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    
+    toast.success('Successfully subscribed! Check your inbox for updates.');
+    setEmail('');
+    setIsSubscribing(false);
+  };
   const currentYear = new Date().getFullYear();
 
   return (
@@ -17,17 +38,27 @@ export default function Footer() {
             <p className="text-background/70 mb-6">
               Get exclusive offers, new product updates, and authentic Bengali recipes delivered to your inbox.
             </p>
-            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
               <input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 className="flex-1 px-4 py-3 rounded-xl bg-background/10 border border-background/20 
                          text-background placeholder:text-background/50
                          focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
                          transition-all duration-200"
               />
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground touch-target">
-                Subscribe
+              <Button 
+                type="submit" 
+                disabled={isSubscribing}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground touch-target"
+              >
+                {isSubscribing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  'Subscribe'
+                )}
               </Button>
             </form>
           </div>

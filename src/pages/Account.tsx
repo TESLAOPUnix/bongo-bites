@@ -3,6 +3,7 @@ import { User, Package, MapPin, LogOut, ChevronRight } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function Account() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -34,6 +35,7 @@ export default function Account() {
 
   const handleLogout = () => {
     logout();
+    toast.success('Successfully logged out');
     navigate('/');
   };
 
