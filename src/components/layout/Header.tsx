@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X, ChevronDown, Phone } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X, ChevronDown, Phone, Facebook, Instagram, Twitter } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { categories } from '@/data/products';
@@ -13,6 +13,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import MiniCart from './MiniCart';
+
+// Threads icon component (not available in Lucide)
+const ThreadsIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.96-.065-1.17.408-2.131 1.37-2.779.813-.546 1.95-.9 3.282-.958.955-.041 1.801.005 2.564.14a7.49 7.49 0 0 0-.09-1.073c-.181-1.058-.607-1.812-1.266-2.243-.724-.474-1.726-.706-2.977-.689-1.128.015-2.058.306-2.762.865-.602.478-.976 1.124-1.111 1.92l-2.018-.354c.216-1.252.857-2.289 1.906-3.085 1.074-.816 2.443-1.238 4.07-1.257h.082c1.726 0 3.18.424 4.323 1.26 1.318.963 2.103 2.398 2.333 4.267.087.707.115 1.478.082 2.295 1.117.705 1.989 1.632 2.523 2.852.812 1.857.737 4.502-1.392 6.59-1.846 1.81-4.182 2.593-7.367 2.615Zm-.123-7.114c-.901.049-1.605.265-2.095.643-.346.266-.462.544-.449.784.017.304.177.67.594.94.481.311 1.151.478 1.886.44 1.167-.063 2.003-.474 2.558-1.259.41-.579.67-1.377.762-2.352a9.788 9.788 0 0 0-3.256.804Z"/>
+  </svg>
+);
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -37,6 +44,13 @@ export default function Header() {
     { name: 'Contact', path: '/contact' },
   ];
 
+  const socialLinks = [
+    { name: 'Facebook', icon: Facebook, url: 'https://facebook.com/bongohridoy' },
+    { name: 'Instagram', icon: Instagram, url: 'https://instagram.com/bongohridoy' },
+    { name: 'Twitter', icon: Twitter, url: 'https://twitter.com/bongohridoy' },
+    { name: 'Threads', icon: ThreadsIcon, url: 'https://threads.net/@bongohridoy' },
+  ];
+
   const cartCount = getCartCount();
 
   return (
@@ -45,6 +59,22 @@ export default function Header() {
       <div className="bg-tertiary text-tertiary-foreground py-2 text-sm hidden md:block">
         <div className="section-container flex items-center justify-between">
           <div className="flex items-center gap-4">
+            {/* Social Media Icons */}
+            <div className="flex items-center gap-2">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.name}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary transition-colors"
+                  aria-label={social.name}
+                >
+                  <social.icon className="w-4 h-4" />
+                </a>
+              ))}
+            </div>
+            <span className="w-px h-4 bg-tertiary-foreground/30" />
             <a href="tel:+913368263382" className="flex items-center gap-1 hover:opacity-80 transition-opacity">
               <Phone className="w-3.5 h-3.5" />
               +91 33-68263382
@@ -112,6 +142,24 @@ export default function Header() {
                         </Link>
                       </SheetClose>
                     ))}
+                  </div>
+                  {/* Social Links in Mobile Menu */}
+                  <div className="border-t border-border mt-4 pt-4">
+                    <p className="px-4 py-2 text-sm font-semibold text-muted-foreground">Follow Us</p>
+                    <div className="flex items-center gap-3 px-4 py-2">
+                      {socialLinks.map((social) => (
+                        <a
+                          key={social.name}
+                          href={social.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition-colors"
+                          aria-label={social.name}
+                        >
+                          <social.icon className="w-5 h-5" />
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 </nav>
               </SheetContent>
