@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { toast } from 'sonner';
 
 export interface CartItem {
   id: string;
@@ -51,17 +52,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prevItems) => {
       const existingItem = prevItems.find((i) => i.id === item.id);
       if (existingItem) {
+        toast.success(`Updated ${item.name} quantity in cart`);
         return prevItems.map((i) =>
           i.id === item.id ? { ...i, quantity: i.quantity + quantity } : i
         );
       }
+      toast.success(`${item.name} added to cart!`);
       return [...prevItems, { ...item, quantity }];
     });
     setIsCartOpen(true);
   };
 
   const removeFromCart = (id: string) => {
+    const item = items.find((i) => i.id === id);
     setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+    if (item) {
+      toast.success(`${item.name} removed from cart`);
+    }
   };
 
   const updateQuantity = (id: string, quantity: number) => {
@@ -78,6 +85,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = () => {
     setItems([]);
+    toast.success('Cart cleared');
   };
 
   const getCartTotal = () => {
