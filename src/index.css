@@ -200,7 +200,7 @@
   /* Category Card */
   .category-card {
     @apply relative overflow-hidden rounded-2xl bg-card shadow-card 
-           hover:shadow-card-hover transition-all duration-300 group cursor-pointer;
+           hover:shadow-card-hover transition-all duration-300 cursor-pointer;
   }
 
   /* Price Display */
