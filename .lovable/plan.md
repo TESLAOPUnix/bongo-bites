@@ -1,162 +1,180 @@
 
 
-## Plan: Social Media Icons, Upcoming Products Section, and Product Stock Status System
+## Plan: Header Updates, Category Card Animations, Footer Enhancements, and Contact Page Improvements
 
 ### Overview
-This plan implements four connected features:
-1. Social media icons in the header
-2. "Upcoming Products" section on the homepage
-3. Enhanced product stock status system (In Stock, Out of Stock, Upcoming)
-4. Updated shop page filters for all three statuses
+This plan implements multiple UI/UX improvements across the header, homepage, footer, and contact page based on your requirements.
 
 ---
 
-### 1. Add Social Media Icons to Header
+### 1. Header Top Bar Restructure
 
-**Location**: Top bar of the header (alongside phone number and WhatsApp link)
+**Current state**: Social icons on left, phone number, WhatsApp CTA button on right side of main header
 
-**Icons to add**:
-- Facebook
-- Instagram
-- Twitter (X)
-- Threads
+**Changes**:
 
-**Implementation approach**:
-- Add icons to the left side of the top bar next to the phone number
-- Use Lucide icons for Facebook, Instagram, and Twitter
-- Create a simple SVG for Threads (Lucide doesn't have it)
-- Icons will link to social media pages (placeholder URLs for now)
-- Style: Small icons with hover effects
+| Position | Current | New |
+|----------|---------|-----|
+| Extreme Left | Facebook, Instagram, Twitter, Threads | YouTube, Facebook, Instagram, X (new icon), Threads |
+| Center-Left | Phone number | Phone number + WhatsApp icon with separate number |
+| Right | "Order via WhatsApp" button | Remove this button |
 
----
+**Icon Updates**:
+- Add YouTube icon (from Lucide) at the extreme left
+- Replace Twitter bird icon with X logo (custom SVG)
+- Add WhatsApp icon next to a separate WhatsApp number
 
-### 2. Add "Upcoming Products" Section to Homepage
-
-**Position**: After Bestseller Products section, before Testimonials
-
-**Design**:
-- Section title: "Coming Soon" with descriptive subtitle
-- Display upcoming products in a grid (similar to bestseller section)
-- Each product card shows "Upcoming" badge and "Notify Me" button instead of Add to Cart
-- Visual distinction with a different background color or accent
+**Search Bar**:
+- Increase width from `max-w-md` to `max-w-xl` (wider)
+- Increase input padding for better visibility
 
 ---
 
-### 3. Update Product Data Structure and Status System
+### 2. Logo Image + Favicon
 
-**Changes to Product interface**:
-- Replace `inStock: boolean` with `stockStatus: 'in-stock' | 'out-of-stock' | 'upcoming'`
-- Add sample upcoming products to the product data
+**Changes**:
+- Copy the uploaded logo image to project assets
+- Replace text "Bongo Hridoy" with the logo image in header
+- Update mobile menu to use the logo image
+- Update footer brand section to use the logo image
+- Set the logo as the favicon in `index.html`
 
-**ProductCard updates**:
-- Show appropriate badge based on stock status
-- "In Stock": Show "Add to Cart" button (current behavior)
-- "Out of Stock": Show overlay with "Notify Me" button
-- "Upcoming": Show "Coming Soon" badge with "Notify Me" button
-
-**Notify Me button behavior**:
-- For now, show a toast notification confirming the user will be notified
-- Can be extended later to collect email/phone for actual notifications
+**Implementation**:
+- Copy `user-uploads://bongo_logo.jpeg` to `public/logo.png` (for favicon) and `src/assets/logo.png` (for React import)
+- Add `<link rel="icon" href="/logo.png" type="image/png">` to index.html
+- Import logo in Header and Footer components
 
 ---
 
-### 4. Update Shop Page Filters
+### 3. Category Card Hover Animations
 
-**Changes to Availability filter**:
-- Replace single "In Stock Only" checkbox with three options:
-  - In Stock
-  - Out of Stock  
-  - Upcoming
+**Current state**: Basic shadow change on hover
 
-**Filter logic**:
-- When no filters selected: show all products
-- When filters selected: show products matching ANY selected status
+**New animations**:
+- Image zoom effect (scale 1.05 on hover)
+- Gradient overlay becomes slightly more prominent
+- Card lifts up slightly (translateY)
+- Arrow icon slides in from right
+- Smooth transitions (300-500ms)
+
+**CSS updates** to `.category-card`:
+- Add `group` class to the Link component
+- Add `hover:-translate-y-2` for lift effect
+- Image: `group-hover:scale-110` for zoom
+- Gradient: slight opacity increase on hover
+- Arrow: slide in animation on hover
+
+---
+
+### 4. Bestseller Products Section - Show 12 Products
+
+**Current**: Shows 8 products (`bestsellers.slice(0, 8)`)
+
+**Change**: Update to show 12 products (`bestsellers.slice(0, 12)`)
+
+**Note**: Current data has only 7 bestseller products. To show 12, we'll need to either:
+- Mark more existing products as bestsellers, OR
+- Display all bestsellers available (up to 12 if they exist)
+
+---
+
+### 5. Footer Enhancements
+
+**Add new column: "Track Your Order"**
+- Add a new column in the footer grid
+- Include a clickable "Track Order" link
+- Style consistently with other footer links
+
+**Add new policy: "Return & Refund Policy"**
+- Add to the bottom policy links section
+- Link to `/returns` route (or anchor)
+
+**Updated footer structure** (5 columns on desktop):
+1. Brand & Social
+2. Quick Links  
+3. Categories
+4. Track Your Order (NEW)
+5. Contact Us
+
+---
+
+### 6. Contact Page Form Improvements
+
+**Add Phone Field**:
+- Add a phone input field to the contact form
+- Place it in the same row as email (3-column grid on larger screens)
+
+**Size Alignment**:
+- Make the form card equal in visual weight to the contact info sidebar
+- Currently: form is `md:col-span-2`, sidebar is `md:col-span-1` (2:1 ratio)
+- Change to equal columns or adjust the layout so both sections are balanced
+- Increase the message textarea rows for a taller form
+
+**Layout options**:
+- Change grid to 2 equal columns (`md:col-span-1` each)
+- Increase form padding and input sizes
 
 ---
 
 ### Technical Details
 
-#### File Changes Required
+#### Files to Modify
 
-**1. `src/data/products.ts`**
-- Update `Product` interface: change `inStock: boolean` to `stockStatus: 'in-stock' | 'out-of-stock' | 'upcoming'`
-- Update existing products to use new `stockStatus` field
-- Add 2-3 new upcoming products
-- Add helper function `getUpcomingProducts()`
+**1. `index.html`**
+- Add favicon link: `<link rel="icon" href="/logo.png" type="image/png">`
 
 **2. `src/components/layout/Header.tsx`**
-- Import additional icons from Lucide (Facebook, Instagram, Twitter)
-- Add Threads SVG icon component
-- Add social media links to the top bar section
+- Replace Twitter icon with custom X icon SVG
+- Add YouTube icon at extreme left
+- Restructure top bar: YouTube | Facebook | Instagram | X | Threads | separator | Phone | WhatsApp icon + number
+- Remove "Order via WhatsApp" button from right actions
+- Replace text logo with image logo (import from assets)
+- Increase search bar: `max-w-xl` and larger padding
 
-**3. `src/components/products/ProductCard.tsx`**
-- Update to check `stockStatus` instead of `inStock`
-- Add "Upcoming" badge styling
-- Add "Notify Me" button component
-- Add toast notification for Notify Me action
+**3. `src/components/layout/Footer.tsx`**
+- Add new "Track Your Order" column
+- Add "Return & Refund Policy" to bottom links
+- Replace text logo with image logo
 
-**4. `src/components/home/UpcomingProducts.tsx`** (new file)
-- Create new section component for upcoming products
-- Filter and display products with `stockStatus: 'upcoming'`
-- Similar structure to BestsellerProducts
+**4. `src/components/products/CategoryCard.tsx`**
+- Add `group` class to the Link element
+- Enhance hover animations on image
+- Add smooth transform transitions
 
-**5. `src/pages/Index.tsx`**
-- Import and add UpcomingProducts section
+**5. `src/index.css`**
+- Update `.category-card` class with enhanced hover effects
 
-**6. `src/pages/Shop.tsx`**
-- Update filter state from `showInStockOnly` to `selectedStockStatus: string[]`
-- Add three checkbox options for stock status
-- Update filtering logic to handle multiple stock statuses
+**6. `src/components/home/BestsellerProducts.tsx`**
+- Change `bestsellers.slice(0, 8)` to `bestsellers.slice(0, 12)`
 
-**7. `src/contexts/CartContext.tsx`**
-- Update `addToCart` to check product stock status before adding
+**7. `src/pages/Contact.tsx`**
+- Add `phone` field to form state
+- Add phone input in the form grid
+- Adjust grid layout for equal column widths
+- Increase textarea rows
 
-**8. `src/pages/ProductDetail.tsx`**
-- Update to use new `stockStatus` field
-- Show "Notify Me" for out-of-stock and upcoming products
-
----
-
-### Visual Design Specifications
-
-**Social Media Icons**:
-- Size: 16x16px in top bar
-- Color: Inherit from tertiary-foreground, primary on hover
-- Spacing: 8px gap between icons
-
-**Upcoming Products Badge**:
-- Background: Accent color (amber/gold)
-- Text: "Coming Soon"
-- Position: Top left of product image (same as other badges)
-
-**Notify Me Button**:
-- Style: Outline variant with bell icon
-- Text: "Notify Me"
-- Full width on product cards
-- Shows toast: "We'll notify you when this product is available!"
-
-**Stock Status Indicators on Cards**:
-
-| Status | Badge | Overlay | Button |
-|--------|-------|---------|--------|
-| In Stock | None (unless bestseller/new) | None | Add to Cart |
-| Out of Stock | "Out of Stock" (muted) | Semi-transparent | Notify Me |
-| Upcoming | "Coming Soon" (accent) | None | Notify Me |
+**8. Copy logo file**
+- Copy `user-uploads://bongo_logo.jpeg` to `public/logo.png`
+- Copy `user-uploads://bongo_logo.jpeg` to `src/assets/logo.png`
 
 ---
 
-### Sample Upcoming Products to Add
+### Visual Specifications
 
-1. **Nolen Gur Ice Cream (500ml)**
-   - Category: Sweets & Mishti
-   - Description: Creamy ice cream made with authentic Nolen Gur
-   - Price: TBD
+**X (Twitter) Icon SVG**:
+```svg
+<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+```
 
-2. **Bengali Fish Pickle (250g)**
-   - Category: Snacks & Homemade Pickles
-   - Description: Traditional pickled fish preparation
+**YouTube Icon**: Use Lucide's `Youtube` component
 
-3. **Durga Puja Special Gift Box**
-   - Category: Seasonal Specials
-   - Description: Curated box of Bengali festive treats
+**Logo dimensions**: 
+- Header: Height 40-48px on desktop, 32-36px on mobile
+- Maintain aspect ratio
+
+**Category Card Hover**:
+- Transform: translateY(-8px)
+- Image scale: 1.1
+- Transition: 300ms ease-out
+- Shadow: shadow-card-hover
 
