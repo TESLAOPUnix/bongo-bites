@@ -8,7 +8,10 @@ interface CategoryCardProps {
 
 export default function CategoryCard({ category }: CategoryCardProps) {
   return (
-    <Link to={`/category/${category.slug}`} className="category-card block">
+    <Link 
+      to={`/category/${category.slug}`} 
+      className="category-card group block hover:-translate-y-2 transition-all duration-300"
+    >
       <div className="aspect-square overflow-hidden">
         <img
           src={category.image}
@@ -17,9 +20,9 @@ export default function CategoryCard({ category }: CategoryCardProps) {
           loading="lazy"
         />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent group-hover:from-foreground/90 transition-all duration-300" />
       <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
-        <h3 className="font-display font-semibold text-background text-sm md:text-base mb-1">
+        <h3 className="font-display font-semibold text-background text-sm md:text-base mb-1 group-hover:text-primary transition-colors duration-300">
           {category.name}
         </h3>
         <div className="flex items-center justify-between">
