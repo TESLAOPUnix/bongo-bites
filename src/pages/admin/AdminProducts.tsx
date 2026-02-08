@@ -1,0 +1,216 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { products as initialProducts, categories, Product, StockStatus } from '@/data/products';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { DeleteConfirmModal } from '@/components/admin/DeleteConfirmModal';
+import { useToast } from '@/hooks/use-toast';
+import { Plus, Search, Pencil, Trash2, Eye } from 'lucide-react';
+
+interface ExtendedProduct extends Product {
+  isVisible?: boolean;
+  purchasePrice?: number;
+}
+
+export default function AdminProducts() {
+  const [products, setProducts] = useState<ExtendedProduct[]>(
+    initialProducts.map((p) => ({ ...p, isVisible: true, purchasePrice: Math.floor(p.price * 0.6) }))
+  );
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [stockFilter, setStockFilter] = useState('all');
+  const [deleteModal, setDeleteModal] = useState<{ open: boolean; product: ExtendedProduct | null }>({
+    open: false,
+    product: null,
+  });
+  const { toast } = useToast();
+
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = categoryFilter === 'all' || product.categorySlug === categoryFilter;
+    const matchesStock = stockFilter === 'all' || product.stockStatus === stockFilter;
+    return matchesSearch && matchesCategory && matchesStock;
+  });
+
+  const toggleVisibility = (productId: string) => {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, isVisible: !p.isVisible } : p))
+    );
+    toast({ title: 'Visibility updated' });
+  };
+
+  const toggleStock = (productId: string) => {
+    setProducts((prev) =>
+      prev.map((p) => {
+        if (p.id === productId) {
+          const newStatus: StockStatus = p.stockStatus === 'in-stock' ? 'out-of-stock' : 'in-stock';
+          return { ...p, stockStatus: newStatus };
+        }
+        return p;
+      })
+    );
+    toast({ title: 'Stock status updated' });
+  };
+
+  const handleDelete = () => {
+    if (deleteModal.product) {
+      setProducts((prev) => prev.filter((p) => p.id !== deleteModal.product?.id));
+      toast({ title: 'Product deleted', description: deleteModal.product.name });
+      setDeleteModal({ open: false, product: null });
+    }
+  };
+
+  const getStockBadge = (status: StockStatus) => {
+    const config: Record<StockStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }> = {
+      'in-stock': { variant: 'default', label: 'In Stock' },
+      'out-of-stock': { variant: 'destructive', label: 'Out of Stock' },
+      upcoming: { variant: 'secondary', label: 'Upcoming' },
+    };
+    return <Badge variant={config[status].variant}>{config[status].label}</Badge>;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Products</h1>
+          <p className="text-muted-foreground">Manage your product catalog</p>
+        </div>
+        <Button asChild>
+          <Link to="/admin/products/new">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Product
+          </Link>
+        </Button>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat.slug} value={cat.slug}>
+                {cat.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={stockFilter} onValueChange={setStockFilter}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="All Stock Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="in-stock">In Stock</SelectItem>
+            <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+            <SelectItem value="upcoming">Upcoming</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Products Table */}
+      <div className="bg-background rounded-lg border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b bg-muted/50">
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Product</th>
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Category</th>
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Price</th>
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Cost</th>
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Stock</th>
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Visible</th>
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProducts.map((product) => (
+                <tr key={product.id} className="border-b last:border-0 hover:bg-muted/30">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-10 h-10 rounded object-cover"
+                      />
+                      <span className="font-medium line-clamp-1">{product.name}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-muted-foreground">{product.category}</td>
+                  <td className="py-3 px-4">₹{product.price}</td>
+                  <td className="py-3 px-4 text-muted-foreground">₹{product.purchasePrice}</td>
+                  <td className="py-3 px-4">
+                    <button onClick={() => toggleStock(product.id)}>
+                      {getStockBadge(product.stockStatus)}
+                    </button>
+                  </td>
+                  <td className="py-3 px-4">
+                    <Switch
+                      checked={product.isVisible}
+                      onCheckedChange={() => toggleVisibility(product.id)}
+                    />
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link to={`/product/${product.slug}`} target="_blank">
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link to={`/admin/products/${product.id}`}>
+                          <Pencil className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setDeleteModal({ open: true, product })}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {filteredProducts.length === 0 && (
+          <div className="py-12 text-center text-muted-foreground">
+            No products found matching your criteria
+          </div>
+        )}
+      </div>
+
+      <DeleteConfirmModal
+        open={deleteModal.open}
+        onOpenChange={(open) => setDeleteModal({ open, product: null })}
+        productName={deleteModal.product?.name || ''}
+        onConfirm={handleDelete}
+      />
+    </div>
+  );
+}
