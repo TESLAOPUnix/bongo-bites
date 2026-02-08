@@ -150,6 +150,7 @@ export const products: Product[] = [
     stockStatus: 'in-stock',
     rating: 4.5,
     reviewCount: 67,
+    isBestseller: true,
   },
   {
     id: '4',
@@ -219,6 +220,7 @@ export const products: Product[] = [
     howToUse: 'Light the tip and let it burn for a few seconds, then blow out the flame.',
     shippingInfo: 'Ships within 1-2 business days.',
     stockStatus: 'in-stock',
+    isBestseller: true,
   },
   {
     id: '8',
@@ -235,6 +237,7 @@ export const products: Product[] = [
     stockStatus: 'in-stock',
     rating: 4.4,
     reviewCount: 45,
+    isBestseller: true,
   },
   {
     id: '9',
@@ -269,6 +272,7 @@ export const products: Product[] = [
     stockStatus: 'out-of-stock',
     rating: 4.6,
     reviewCount: 78,
+    isBestseller: true,
   },
   {
     id: '11',
@@ -285,6 +289,7 @@ export const products: Product[] = [
     stockStatus: 'in-stock',
     rating: 4.8,
     reviewCount: 92,
+    isBestseller: true,
   },
   {
     id: '12',
@@ -299,6 +304,7 @@ export const products: Product[] = [
     howToUse: 'Add 2 tbsp to boiled yellow peas, cook for 5 minutes.',
     shippingInfo: 'Ships within 1-2 business days.',
     stockStatus: 'out-of-stock',
+    isBestseller: true,
   },
   // Upcoming products
   {
