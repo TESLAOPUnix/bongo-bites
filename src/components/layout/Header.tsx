@@ -191,7 +191,7 @@ export default function Header() {
               <img 
                 src={logo} 
                 alt="Bongo Hridoy - From the Heart of Bengal" 
-                className="h-10 md:h-12 w-auto"
+                className="h-12 md:h-16 w-auto"
               />
             </Link>
 
