@@ -279,7 +279,21 @@ export default function ProductDetail() {
             )}
 
             {/* Trust Signals */}
-            <div className="flex flex-col sm:flex-row gap-4 py-6 border-t border-b border-border">
+            <div className="grid grid-cols-2 gap-4 py-6 border-t border-b border-border">
+              <div className="flex items-center gap-3">
+                <Shield className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">Secure Checkout</p>
+                  <p className="text-xs text-muted-foreground">100% protected</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Check className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">Freshly Packed</p>
+                  <p className="text-xs text-muted-foreground">Quality guaranteed</p>
+                </div>
+              </div>
               <div className="flex items-center gap-3">
                 <Truck className="h-5 w-5 text-primary" />
                 <div>
@@ -288,10 +302,10 @@ export default function ProductDetail() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Shield className="h-5 w-5 text-primary" />
+                <Star className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="text-sm font-medium">Secure Payment</p>
-                  <p className="text-xs text-muted-foreground">100% protected</p>
+                  <p className="text-sm font-medium">Quality Assured</p>
+                  <p className="text-xs text-muted-foreground">Authentic products</p>
                 </div>
               </div>
             </div>
@@ -308,27 +322,11 @@ export default function ProductDetail() {
               >
                 Description
               </TabsTrigger>
-              {product.ingredients && (
-                <TabsTrigger
-                  value="ingredients"
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
-                >
-                  Ingredients
-                </TabsTrigger>
-              )}
-              {product.howToUse && (
-                <TabsTrigger
-                  value="usage"
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
-                >
-                  How to Use
-                </TabsTrigger>
-              )}
               <TabsTrigger
-                value="shipping"
+                value="additional"
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
               >
-                Shipping
+                Additional Information
               </TabsTrigger>
             </TabsList>
             <div className="py-6">
@@ -337,24 +335,15 @@ export default function ProductDetail() {
                   {product.description}
                 </p>
               </TabsContent>
-              {product.ingredients && (
-                <TabsContent value="ingredients" className="mt-0">
-                  <p className="text-muted-foreground leading-relaxed max-w-3xl">
-                    {product.ingredients}
-                  </p>
-                </TabsContent>
-              )}
-              {product.howToUse && (
-                <TabsContent value="usage" className="mt-0">
-                  <p className="text-muted-foreground leading-relaxed max-w-3xl">
-                    {product.howToUse}
-                  </p>
-                </TabsContent>
-              )}
-              <TabsContent value="shipping" className="mt-0">
-                <p className="text-muted-foreground leading-relaxed max-w-3xl">
-                  {product.shippingInfo || 'Standard shipping within India takes 3-5 business days. International shipping available to 30+ countries. Products are freshly packed to ensure quality during transit.'}
-                </p>
+              <TabsContent value="additional" className="mt-0">
+                <table className="text-sm">
+                  <tbody>
+                    <tr>
+                      <td className="py-2 pr-8 font-medium text-foreground">Weight</td>
+                      <td className="py-2 text-muted-foreground">{product.weight ? `${product.weight} kg` : '1.0 kg'}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </TabsContent>
             </div>
           </Tabs>

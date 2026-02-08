@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Facebook, Instagram, Youtube, Loader2, Package } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Instagram, Youtube, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import logo from '@/assets/logo.png';
@@ -90,11 +90,11 @@ export default function Footer() {
 
       {/* Main Footer */}
       <div className="section-container py-12 md:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="inline-block">
-              <img src={logo} alt="Bongo Hridoy" className="h-12 w-auto mb-1" />
+              <img src={logo} alt="Bongo Hridoy" className="h-12 w-12 rounded-full object-cover mb-1" />
               <p className="text-xs text-background/60">From the Heart of Bengal</p>
             </Link>
             <p className="mt-4 text-sm text-background/70 leading-relaxed">
@@ -123,10 +123,10 @@ export default function Footer() {
               Quick Links
             </h4>
             <ul className="space-y-3">
-              {['Home', 'Shop', 'Our Story', 'Blogs', 'Contact'].map((link) => (
+              {['Home', 'Shop', 'Our Story', 'Blogs', 'Contact', 'Track Your Order'].map((link) => (
                 <li key={link}>
                   <Link
-                    to={`/${link.toLowerCase().replace(' ', '-')}`}
+                    to={link === 'Track Your Order' ? '/track-order' : `/${link.toLowerCase().replace(' ', '-')}`}
                     className="text-sm text-background/70 hover:text-primary transition-colors"
                   >
                     {link}
@@ -158,40 +158,6 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
-            </ul>
-          </div>
-
-          {/* Track Your Order */}
-          <div>
-            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4 text-background/90">
-              Track Your Order
-            </h4>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  to="/track-order"
-                  className="flex items-center gap-2 text-sm text-background/70 hover:text-primary transition-colors"
-                >
-                  <Package className="h-4 w-4" />
-                  Track Order
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/account"
-                  className="text-sm text-background/70 hover:text-primary transition-colors"
-                >
-                  My Orders
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/shipping"
-                  className="text-sm text-background/70 hover:text-primary transition-colors"
-                >
-                  Shipping Info
-                </Link>
-              </li>
             </ul>
           </div>
 

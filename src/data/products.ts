@@ -19,6 +19,7 @@ export interface Product {
   reviewCount?: number;
   isBestseller?: boolean;
   isNew?: boolean;
+  weight?: number;
 }
 
 export interface Category {

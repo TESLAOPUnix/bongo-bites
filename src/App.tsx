@@ -13,6 +13,9 @@ import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Account from "./pages/Account";
+import Profile from "./pages/account/Profile";
+import Orders from "./pages/account/Orders";
+import Addresses from "./pages/account/Addresses";
 import Contact from "./pages/Contact";
 import Blogs from "./pages/Blogs";
 import OurStory from "./pages/OurStory";
@@ -42,6 +45,9 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/account" element={<Account />} />
+                <Route path="/account/profile" element={<Profile />} />
+                <Route path="/account/orders" element={<Orders />} />
+                <Route path="/account/addresses" element={<Addresses />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/blogs" element={<Blogs />} />
                 <Route path="/our-story" element={<OurStory />} />
