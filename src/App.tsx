@@ -16,6 +16,7 @@ import Account from "./pages/Account";
 import Profile from "./pages/account/Profile";
 import Orders from "./pages/account/Orders";
 import Addresses from "./pages/account/Addresses";
+import Wishlist from "./pages/account/Wishlist";
 import Contact from "./pages/Contact";
 import Blogs from "./pages/Blogs";
 import OurStory from "./pages/OurStory";
@@ -24,6 +25,7 @@ import { AdminLayout } from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminProductForm from "./pages/admin/AdminProductForm";
+import AdminOrders from "./pages/admin/AdminOrders";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +50,7 @@ const App = () => (
                 <Route path="/account/profile" element={<Profile />} />
                 <Route path="/account/orders" element={<Orders />} />
                 <Route path="/account/addresses" element={<Addresses />} />
+                <Route path="/account/wishlist" element={<Wishlist />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/blogs" element={<Blogs />} />
                 <Route path="/our-story" element={<OurStory />} />
@@ -59,6 +62,7 @@ const App = () => (
                   <Route path="products" element={<AdminProducts />} />
                   <Route path="products/new" element={<AdminProductForm />} />
                   <Route path="products/:id" element={<AdminProductForm />} />
+                  <Route path="orders" element={<AdminOrders />} />
                 </Route>
                 
                 <Route path="*" element={<NotFound />} />
