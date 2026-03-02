@@ -1,33 +1,16 @@
-import { Clock } from 'lucide-react';
-import { useUpcomingProducts } from '@/hooks/useProducts';
-import { upcomingProducts as staticUpcoming } from '@/data/products';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Clock } from 'lucide-react';
+import { upcomingProducts } from '@/data/products';
 import ProductCard from '@/components/products/ProductCard';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
 
 export default function UpcomingProducts() {
-  const { data: products } = useUpcomingProducts();
-
-  const displayProducts = isSupabaseConfigured
-    ? (products || [])
-    : staticUpcoming.map((p) => ({
-        ...p,
-        image: p.image,
-        images: p.images || [p.image],
-        stock: 0,
-        isBestseller: p.isBestseller || false,
-        isNew: p.isNew || false,
-        isUpcoming: true,
-        isVisible: true,
-        category: p.category,
-        categorySlug: p.categorySlug,
-        stockStatus: 'upcoming' as const,
-      }));
-
-  if (displayProducts.length === 0) return null;
+  if (upcomingProducts.length === 0) return null;
 
   return (
     <section className="section-padding bg-accent/5">
       <div className="section-container">
+        {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -45,8 +28,9 @@ export default function UpcomingProducts() {
           </div>
         </div>
 
+        {/* Products Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-6">
-          {displayProducts.map((product) => (
+          {upcomingProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>

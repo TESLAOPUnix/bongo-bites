@@ -1,24 +1,17 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Star, Bell, Heart } from 'lucide-react';
+import { ShoppingCart, Star, Bell } from 'lucide-react';
+import { Product } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { useWishlistIds, useToggleWishlist } from '@/hooks/useWishlist';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import type { UIProduct } from '@/hooks/useProducts';
 
 interface ProductCardProps {
-  product: UIProduct;
+  product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
-  const { user } = useAuth();
-  const { data: wishlistIds } = useWishlistIds();
-  const toggleWishlist = useToggleWishlist();
-
-  const isWished = wishlistIds?.has(product.id) || false;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -56,16 +49,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     });
   };
 
-  const handleToggleWishlist = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!user) {
-      toast({ title: 'Please sign in', description: 'Sign in to add items to your wishlist.' });
-      return;
-    }
-    toggleWishlist.mutate({ productId: product.id, isWished });
-  };
-
   const isAvailable = product.stockStatus === 'in-stock';
   const isOutOfStock = product.stockStatus === 'out-of-stock';
   const isUpcoming = product.stockStatus === 'upcoming';
@@ -83,14 +66,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           loading="lazy"
         />
         
-        {/* Wishlist Button */}
-        <button
-          onClick={handleToggleWishlist}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors z-10"
-        >
-          <Heart className={`h-4 w-4 ${isWished ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
-        </button>
-
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {isUpcoming && (
@@ -130,14 +105,23 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Quick Add / Notify Button */}
         {isAvailable ? (
           <div className="absolute bottom-3 left-3 right-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-            <Button onClick={handleAddToCart} className="w-full touch-target shadow-lg" size="sm">
+            <Button
+              onClick={handleAddToCart}
+              className="w-full touch-target shadow-lg"
+              size="sm"
+            >
               <ShoppingCart className="h-4 w-4 mr-2" />
               Add to Cart
             </Button>
           </div>
         ) : (
           <div className="absolute bottom-3 left-3 right-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-            <Button onClick={handleNotifyMe} variant="outline" className="w-full touch-target shadow-lg bg-background" size="sm">
+            <Button
+              onClick={handleNotifyMe}
+              variant="outline"
+              className="w-full touch-target shadow-lg bg-background"
+              size="sm"
+            >
               <Bell className="h-4 w-4 mr-2" />
               Notify Me
             </Button>
@@ -147,10 +131,22 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Content */}
       <div className="p-4">
+        {/* Category */}
         <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
+        
+        {/* Title */}
         <h3 className="font-medium text-sm md:text-base line-clamp-2 mb-2 group-hover:text-primary transition-colors">
           {product.name}
         </h3>
+
+        {/* Rating - Only show if reviews exist */}
+        {product.rating && product.reviewCount && product.reviewCount > 0 && (
+          <div className="flex items-center gap-1 mb-2">
+            <Star className="h-4 w-4 fill-accent text-accent" />
+            <span className="text-sm font-medium">{product.rating}</span>
+            <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
+          </div>
+        )}
 
         {/* Price */}
         <div className="flex items-center gap-2 flex-wrap">

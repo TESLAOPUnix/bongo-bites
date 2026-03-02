@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
+import { Category } from '@/data/products';
 import { ArrowRight } from 'lucide-react';
-import type { UICategory } from '@/hooks/useProducts';
-import { ArrowRight as ArrowRightIcon } from 'lucide-react';
 
 interface CategoryCardProps {
-  category: UICategory;
+  category: Category;
 }
 
 export default function CategoryCard({ category }: CategoryCardProps) {
