@@ -1,0 +1,941 @@
+openapi: 3.0.3
+info:
+  title: Bengali Ecommerce API
+  description: REST API specification for the Bengali ecommerce platform backend.
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: https://api.example.com
+    description: Production
+
+tags:
+  - name: Auth
+  - name: Products
+  - name: Categories
+  - name: Wishlist
+  - name: Orders
+  - name: Account
+  - name: Blogs
+  - name: Search
+  - name: Delivery
+  - name: Admin
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # ─── Pagination ─────────────────────────────────────────
+    PaginationMeta:
+      type: object
+      properties:
+        page: { type: integer, example: 1 }
+        limit: { type: integer, example: 20 }
+        total: { type: integer, example: 247 }
+        pages: { type: integer, example: 13 }
+
+    PaginatedResponse:
+      type: object
+      properties:
+        data: { type: array, items: {} }
+        pagination: { $ref: '#/components/schemas/PaginationMeta' }
+
+    # ─── Error ──────────────────────────────────────────────
+    ErrorResponse:
+      type: object
+      properties:
+        error: { type: boolean, example: true }
+        message: { type: string, example: "Resource not found" }
+        code: { type: string, example: "NOT_FOUND" }
+
+    # ─── User ──────────────────────────────────────────────
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        full_name: { type: string, example: "Rahim Das" }
+        email: { type: string, format: email }
+        phone: { type: string, example: "+919876543210" }
+        role: { type: string, enum: [user, admin] }
+        created_at: { type: string, format: date-time }
+
+    AuthResponse:
+      type: object
+      properties:
+        token: { type: string }
+        user: { $ref: '#/components/schemas/User' }
+
+    RegisterRequest:
+      type: object
+      required: [full_name, email, password]
+      properties:
+        full_name: { type: string }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        phone: { type: string }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+
+    # ─── Address ────────────────────────────────────────────
+    Address:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        phone: { type: string }
+        address_line1: { type: string }
+        address_line2: { type: string }
+        city: { type: string }
+        state: { type: string }
+        country: { type: string }
+        pincode: { type: string }
+        is_default: { type: boolean }
+
+    AddressInput:
+      type: object
+      required: [name, phone, address_line1, city, state, pincode]
+      properties:
+        name: { type: string }
+        phone: { type: string }
+        address_line1: { type: string }
+        address_line2: { type: string }
+        city: { type: string }
+        state: { type: string }
+        pincode: { type: string }
+        is_default: { type: boolean }
+
+    # ─── Category ──────────────────────────────────────────
+    Category:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, example: "Herbs & Spices" }
+        slug: { type: string, example: "herbs-spices" }
+        product_count: { type: integer, example: 18 }
+
+    # ─── Product ────────────────────────────────────────────
+    ProductImage:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        image_url: { type: string, format: uri }
+        alt_text: { type: string }
+        sort_order: { type: integer }
+
+    Product:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        slug: { type: string }
+        description: { type: string }
+        category_id: { type: string, format: uuid }
+        category_name: { type: string }
+        category_slug: { type: string }
+        price: { type: number, format: float }
+        sale_price: { type: number, format: float, nullable: true }
+        sku: { type: string, nullable: true }
+        stock: { type: integer }
+        weight: { type: string, nullable: true }
+        size_or_dimensions: { type: string, nullable: true }
+        keywords: { type: array, items: { type: string } }
+        images: { type: array, items: { $ref: '#/components/schemas/ProductImage' } }
+        is_bestseller: { type: boolean }
+        is_visible: { type: boolean }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    ProductInput:
+      type: object
+      required: [name, description, category_id, price]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        category_id: { type: string, format: uuid }
+        price: { type: number }
+        sale_price: { type: number }
+        sku: { type: string }
+        stock: { type: integer }
+        weight: { type: string }
+        size_or_dimensions: { type: string }
+        keywords: { type: array, items: { type: string } }
+        images:
+          type: array
+          items:
+            type: object
+            properties:
+              image_url: { type: string }
+              alt_text: { type: string }
+              sort_order: { type: integer }
+
+    # ─── Wishlist ──────────────────────────────────────────
+    WishlistItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        product_id: { type: string, format: uuid }
+        product: { $ref: '#/components/schemas/Product' }
+        created_at: { type: string, format: date-time }
+
+    WishlistStats:
+      type: object
+      properties:
+        product_id: { type: string, format: uuid }
+        product_name: { type: string }
+        wishlist_count: { type: integer }
+
+    # ─── Order ─────────────────────────────────────────────
+    OrderItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        product_id: { type: string, format: uuid }
+        product_name_snapshot: { type: string }
+        quantity: { type: integer }
+        price_snapshot: { type: number }
+
+    Order:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        status: { type: string, enum: [pending, confirmed, processing, shipped, out_for_delivery, delivered, cancelled, returned] }
+        total_amount: { type: number }
+        payment_status: { type: string, enum: [pending, paid, failed, refunded] }
+        payment_method: { type: string, enum: [cod, upi, card, netbanking, wallet] }
+        items: { type: array, items: { $ref: '#/components/schemas/OrderItem' } }
+        created_at: { type: string, format: date-time }
+
+    CreateOrderRequest:
+      type: object
+      required: [items, address_id]
+      properties:
+        address_id: { type: string, format: uuid }
+        payment_method: { type: string, enum: [cod, upi, card, netbanking, wallet] }
+        items:
+          type: array
+          items:
+            type: object
+            required: [product_id, quantity]
+            properties:
+              product_id: { type: string, format: uuid }
+              quantity: { type: integer, minimum: 1 }
+
+    # ─── Blog ──────────────────────────────────────────────
+    Blog:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        slug: { type: string }
+        content: { type: string }
+        featured_image: { type: string }
+        meta_title: { type: string }
+        meta_description: { type: string }
+        created_at: { type: string, format: date-time }
+
+    BlogInput:
+      type: object
+      required: [title, content]
+      properties:
+        title: { type: string }
+        content: { type: string }
+        featured_image: { type: string }
+        meta_title: { type: string }
+        meta_description: { type: string }
+
+    # ─── Delivery ──────────────────────────────────────────
+    DeliveryCheckResponse:
+      type: object
+      properties:
+        delivery_available: { type: boolean }
+        delivery_time_days: { type: integer }
+
+    # ─── Search ────────────────────────────────────────────
+    SearchResponse:
+      type: object
+      properties:
+        products: { type: array, items: { $ref: '#/components/schemas/Product' } }
+        categories: { type: array, items: { $ref: '#/components/schemas/Category' } }
+        blogs: { type: array, items: { $ref: '#/components/schemas/Blog' } }
+
+    # ─── Dashboard ─────────────────────────────────────────
+    DashboardStats:
+      type: object
+      properties:
+        total_orders: { type: integer }
+        orders_today: { type: integer }
+        orders_this_month: { type: integer }
+        fulfilled_orders: { type: integer }
+        pending_orders: { type: integer }
+        in_delivery: { type: integer }
+        total_revenue: { type: number }
+        revenue_this_month: { type: number }
+        total_products: { type: integer }
+        out_of_stock: { type: integer }
+        total_users: { type: integer }
+        most_wishlisted:
+          type: array
+          items: { $ref: '#/components/schemas/WishlistStats' }
+        recent_orders:
+          type: array
+          items: { $ref: '#/components/schemas/Order' }
+
+# ─── Paths ─────────────────────────────────────────────────
+
+paths:
+  # ═══ AUTH ═══════════════════════════════════════════════
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user profile
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+
+  /api/auth/profile:
+    put:
+      tags: [Auth]
+      summary: Update profile
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                full_name: { type: string }
+                phone: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+
+  /api/auth/password:
+    put:
+      tags: [Auth]
+      summary: Change password
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [current_password, new_password]
+              properties:
+                current_password: { type: string }
+                new_password: { type: string, minLength: 8 }
+      responses:
+        '200':
+          description: Password changed
+
+  # ═══ PRODUCTS ══════════════════════════════════════════
+  /api/products:
+    get:
+      tags: [Products]
+      summary: List products with filters
+      parameters:
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: min_price
+          in: query
+          schema: { type: number }
+        - name: max_price
+          in: query
+          schema: { type: number }
+        - name: in_stock
+          in: query
+          schema: { type: boolean }
+        - name: sort
+          in: query
+          schema: { type: string, enum: [price_asc, price_desc, newest, most_wishlisted] }
+        - name: q
+          in: query
+          schema: { type: string }
+          description: Search query
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Product' }
+                  pagination: { $ref: '#/components/schemas/PaginationMeta' }
+
+  /api/products/{slug}:
+    get:
+      tags: [Products]
+      summary: Get product by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Product' }
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/products/category/{slug}:
+    get:
+      tags: [Products]
+      summary: Get products by category slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Product' }
+                  pagination: { $ref: '#/components/schemas/PaginationMeta' }
+
+  # ═══ CATEGORIES ════════════════════════════════════════
+  /api/categories:
+    get:
+      tags: [Categories]
+      summary: List all categories with product counts
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Category' }
+
+  # ═══ WISHLIST ══════════════════════════════════════════
+  /api/wishlist:
+    get:
+      tags: [Wishlist]
+      summary: Get user wishlist
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/WishlistItem' }
+
+  /api/wishlist/add:
+    post:
+      tags: [Wishlist]
+      summary: Add product to wishlist
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [product_id]
+              properties:
+                product_id: { type: string, format: uuid }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WishlistItem' }
+
+  /api/wishlist/remove:
+    delete:
+      tags: [Wishlist]
+      summary: Remove product from wishlist
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [product_id]
+              properties:
+                product_id: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Removed
+
+  # ═══ ORDERS ════════════════════════════════════════════
+  /api/orders:
+    get:
+      tags: [Orders]
+      summary: Get user orders
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Order' }
+    post:
+      tags: [Orders]
+      summary: Create a new order
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateOrderRequest' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+
+  /api/orders/{id}:
+    get:
+      tags: [Orders]
+      summary: Get order by ID
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+
+  # ═══ ADDRESSES ═════════════════════════════════════════
+  /api/account/addresses:
+    get:
+      tags: [Account]
+      summary: Get user addresses
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Address' }
+    post:
+      tags: [Account]
+      summary: Add new address
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddressInput' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Address' }
+
+  /api/account/addresses/{id}:
+    put:
+      tags: [Account]
+      summary: Update address
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddressInput' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Address' }
+    delete:
+      tags: [Account]
+      summary: Delete address
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Deleted
+
+  # ═══ SEARCH ════════════════════════════════════════════
+  /api/search:
+    get:
+      tags: [Search]
+      summary: Global search
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SearchResponse' }
+
+  # ═══ DELIVERY ══════════════════════════════════════════
+  /api/delivery/check:
+    get:
+      tags: [Delivery]
+      summary: Check delivery availability by pincode
+      parameters:
+        - name: pincode
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DeliveryCheckResponse' }
+
+  # ═══ BLOGS ═════════════════════════════════════════════
+  /api/blogs:
+    get:
+      tags: [Blogs]
+      summary: List blogs (paginated)
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, default: 12 }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Blog' }
+                  pagination: { $ref: '#/components/schemas/PaginationMeta' }
+
+  /api/blogs/{slug}:
+    get:
+      tags: [Blogs]
+      summary: Get blog by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Blog' }
+
+  # ═══ ADMIN ═════════════════════════════════════════════
+  /api/admin/dashboard:
+    get:
+      tags: [Admin]
+      summary: Get dashboard stats
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardStats' }
+
+  /api/admin/products:
+    get:
+      tags: [Admin]
+      summary: List products (admin)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Product' }
+                  total: { type: integer }
+    post:
+      tags: [Admin]
+      summary: Create product
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProductInput' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Product' }
+
+  /api/admin/products/{id}:
+    put:
+      tags: [Admin]
+      summary: Update product
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProductInput' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Product' }
+    delete:
+      tags: [Admin]
+      summary: Delete product
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Deleted
+
+  /api/admin/orders:
+    get:
+      tags: [Admin]
+      summary: List all orders (admin)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Order' }
+                  pagination: { $ref: '#/components/schemas/PaginationMeta' }
+
+  /api/admin/orders/{id}:
+    get:
+      tags: [Admin]
+      summary: Get order detail (admin)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+    put:
+      tags: [Admin]
+      summary: Update order status
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [pending, confirmed, processing, shipped, out_for_delivery, delivered, cancelled, returned] }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+
+  /api/admin/orders/manual:
+    post:
+      tags: [Admin]
+      summary: Create manual order
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [customer_name, customer_email, items]
+              properties:
+                customer_name: { type: string }
+                customer_email: { type: string }
+                customer_phone: { type: string }
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      product_id: { type: string }
+                      quantity: { type: integer }
+                      price: { type: number }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+
+  /api/admin/wishlist/stats:
+    get:
+      tags: [Admin]
+      summary: Get wishlist analytics
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/WishlistStats' }
+
+  /api/admin/blogs:
+    post:
+      tags: [Admin]
+      summary: Create blog post
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BlogInput' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Blog' }
+
+  /api/admin/blogs/{id}:
+    put:
+      tags: [Admin]
+      summary: Update blog post
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BlogInput' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Blog' }
+    delete:
+      tags: [Admin]
+      summary: Delete blog post
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Deleted
