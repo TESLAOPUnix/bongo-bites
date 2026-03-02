@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
   Package,
+  ShoppingCart,
   LogOut,
   Menu,
   X,
@@ -16,6 +17,7 @@ import {
 const navItems = [
   { title: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { title: 'Products', href: '/admin/products', icon: Package },
+  { title: 'Orders', href: '/admin/orders', icon: ShoppingCart },
 ];
 
 export function AdminLayout() {
