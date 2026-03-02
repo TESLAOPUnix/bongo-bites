@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
 interface User {
   id: string;
@@ -17,42 +19,48 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_STORAGE_KEY = 'bongohridoy_auth';
+function mapSupabaseUser(supabaseUser: SupabaseUser): User {
+  return {
+    id: supabaseUser.id,
+    name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || '',
+    email: supabaseUser.email || '',
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session
-    const savedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (savedAuth) {
-      try {
-        setUser(JSON.parse(savedAuth));
-      } catch (e) {
-        console.error('Failed to parse auth from localStorage');
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session: Session | null) => {
+        if (session?.user) {
+          setUser(mapSupabaseUser(session.user));
+        } else {
+          setUser(null);
+        }
+        setIsLoading(false);
       }
-    }
-    setIsLoading(false);
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(mapSupabaseUser(session.user));
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     try {
-      // Simulate API call - replace with actual backend
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      if (email && password.length >= 6) {
-        const mockUser = {
-          id: '1',
-          name: email.split('@')[0],
-          email,
-        };
-        setUser(mockUser);
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(mockUser));
-        return { success: true };
-      }
-      return { success: false, error: 'Invalid credentials' };
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return { success: false, error: error.message };
+      return { success: true };
     } catch (error) {
       return { success: false, error: 'Login failed. Please try again.' };
     } finally {
@@ -67,20 +75,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   ): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     try {
-      // Simulate API call - replace with actual backend
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      if (name && email && password.length >= 6) {
-        const mockUser = {
-          id: '1',
-          name,
-          email,
-        };
-        setUser(mockUser);
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(mockUser));
-        return { success: true };
-      }
-      return { success: false, error: 'Please fill all fields correctly' };
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: name },
+          emailRedirectTo: window.location.origin,
+        },
+      });
+      if (error) return { success: false, error: error.message };
+      return { success: true };
     } catch (error) {
       return { success: false, error: 'Registration failed. Please try again.' };
     } finally {
@@ -88,9 +92,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
   };
 
   return (
