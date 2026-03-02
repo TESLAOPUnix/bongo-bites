@@ -1,10 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+import { authService } from '@/services/authService';
+import type { User } from '@/types';
 
 interface AuthContextType {
   user: User | null;
@@ -17,20 +13,22 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_STORAGE_KEY = 'bongohridoy_auth';
+const TOKEN_KEY = 'auth_token';
+const USER_KEY = 'auth_user';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session
-    const savedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (savedAuth) {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const savedUser = localStorage.getItem(USER_KEY);
+    if (token && savedUser) {
       try {
-        setUser(JSON.parse(savedAuth));
-      } catch (e) {
-        console.error('Failed to parse auth from localStorage');
+        setUser(JSON.parse(savedUser));
+      } catch {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
       }
     }
     setIsLoading(false);
@@ -39,50 +37,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     try {
-      // Simulate API call - replace with actual backend
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      if (email && password.length >= 6) {
-        const mockUser = {
-          id: '1',
-          name: email.split('@')[0],
-          email,
-        };
-        setUser(mockUser);
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(mockUser));
-        return { success: true };
-      }
-      return { success: false, error: 'Invalid credentials' };
+      const response = await authService.login(email, password);
+      localStorage.setItem(TOKEN_KEY, response.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(response.user));
+      setUser(response.user);
+      return { success: true };
     } catch (error) {
-      return { success: false, error: 'Login failed. Please try again.' };
+      return { success: false, error: error instanceof Error ? error.message : 'Login failed' };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (
-    name: string,
-    email: string,
-    password: string
-  ): Promise<{ success: boolean; error?: string }> => {
+  const register = async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     try {
-      // Simulate API call - replace with actual backend
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      if (name && email && password.length >= 6) {
-        const mockUser = {
-          id: '1',
-          name,
-          email,
-        };
-        setUser(mockUser);
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(mockUser));
-        return { success: true };
-      }
-      return { success: false, error: 'Please fill all fields correctly' };
+      const response = await authService.register(name, email, password);
+      localStorage.setItem(TOKEN_KEY, response.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(response.user));
+      setUser(response.user);
+      return { success: true };
     } catch (error) {
-      return { success: false, error: 'Registration failed. Please try again.' };
+      return { success: false, error: error instanceof Error ? error.message : 'Registration failed' };
     } finally {
       setIsLoading(false);
     }
@@ -90,20 +66,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated: !!user,
-        isLoading,
-        login,
-        register,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

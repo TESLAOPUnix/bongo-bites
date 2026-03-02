@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, ChevronDown, Phone, Facebook, Instagram, Youtube } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Search, ShoppingCart, User, Menu, ChevronDown, Phone, Facebook, Instagram, Youtube, X as XClose, Loader2 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { categories } from '@/data/products';
+import { CATEGORIES } from '@/data/categories';
+import { useSearch } from '@/hooks/useSearch';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -39,17 +40,35 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const { getCartCount, setIsCartOpen } = useCart();
   const { isAuthenticated } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { data: searchResults, isLoading: isSearching } = useSearch(searchQuery);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowSearchResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close search on route change
+  useEffect(() => {
+    setShowSearchResults(false);
+    setSearchQuery('');
+  }, [location.pathname]);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -69,23 +88,23 @@ export default function Header() {
 
   const cartCount = getCartCount();
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+      setShowSearchResults(false);
+    }
+  };
+
   return (
     <>
       {/* Top Bar */}
       <div className="bg-tertiary text-tertiary-foreground py-2 text-sm hidden md:block">
         <div className="section-container flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {/* Social Media Icons */}
             <div className="flex items-center gap-2">
               {socialLinks.map((social) => (
-                <a
-                  key={social.name}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-primary transition-colors"
-                  aria-label={social.name}
-                >
+                <a key={social.name} href={social.url} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors" aria-label={social.name}>
                   <social.icon className="w-4 h-4" />
                 </a>
               ))}
@@ -103,12 +122,7 @@ export default function Header() {
           </div>
           <div className="flex items-center gap-2">
             <span>Ordering from abroad?</span>
-            <a
-              href="https://wa.me/919330396636"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold hover:underline"
-            >
+            <a href="https://wa.me/919330396636" target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline">
               Connect on WhatsApp →
             </a>
           </div>
@@ -116,11 +130,7 @@ export default function Header() {
       </div>
 
       {/* Main Header */}
-      <header
-        className={`sticky top-0 z-50 bg-background transition-all duration-300 ${
-          isScrolled ? 'shadow-md' : 'border-b border-border'
-        }`}
-      >
+      <header className={`sticky top-0 z-50 bg-background transition-all duration-300 ${isScrolled ? 'shadow-md' : 'border-b border-border'}`}>
         <div className="section-container">
           <div className="flex items-center justify-between h-16 md:h-20 gap-4">
             {/* Mobile Menu */}
@@ -132,51 +142,31 @@ export default function Header() {
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] p-0">
                 <div className="p-6 border-b border-border">
-                  <Link to="/">
-                    <img src={logo} alt="Bongo Hridoy" className="h-10 w-auto" />
-                  </Link>
+                  <Link to="/"><img src={logo} alt="Bongo Hridoy" className="h-10 w-auto" /></Link>
                 </div>
                 <nav className="p-4">
                   {navLinks.map((link) => (
                     <SheetClose asChild key={link.path}>
-                      <Link
-                        to={link.path}
-                        className={`block py-3 px-4 rounded-lg text-lg transition-colors ${
-                          location.pathname === link.path
-                            ? 'bg-primary/10 text-primary font-medium'
-                            : 'hover:bg-secondary'
-                        }`}
-                      >
+                      <Link to={link.path} className={`block py-3 px-4 rounded-lg text-lg transition-colors ${location.pathname === link.path ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-secondary'}`}>
                         {link.name}
                       </Link>
                     </SheetClose>
                   ))}
                   <div className="border-t border-border mt-4 pt-4">
                     <p className="px-4 py-2 text-sm font-semibold text-muted-foreground">Categories</p>
-                    {categories.slice(0, 6).map((cat) => (
+                    {CATEGORIES.slice(0, 8).map((cat) => (
                       <SheetClose asChild key={cat.slug}>
-                        <Link
-                          to={`/category/${cat.slug}`}
-                          className="block py-2 px-4 text-sm hover:bg-secondary rounded-lg transition-colors"
-                        >
+                        <Link to={`/category/${cat.slug}`} className="block py-2 px-4 text-sm hover:bg-secondary rounded-lg transition-colors">
                           {cat.name}
                         </Link>
                       </SheetClose>
                     ))}
                   </div>
-                  {/* Social Links in Mobile Menu */}
                   <div className="border-t border-border mt-4 pt-4">
                     <p className="px-4 py-2 text-sm font-semibold text-muted-foreground">Follow Us</p>
                     <div className="flex items-center gap-3 px-4 py-2">
                       {socialLinks.map((social) => (
-                        <a
-                          key={social.name}
-                          href={social.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition-colors"
-                          aria-label={social.name}
-                        >
+                        <a key={social.name} href={social.url} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition-colors" aria-label={social.name}>
                           <social.icon className="w-5 h-5" />
                         </a>
                       ))}
@@ -188,46 +178,91 @@ export default function Header() {
 
             {/* Logo */}
             <Link to="/" className="flex-shrink-0">
-              <img 
-                src={logo} 
-                alt="Bongo Hridoy - From the Heart of Bengal" 
-                className="h-12 md:h-16 w-auto"
-              />
+              <img src={logo} alt="Bongo Hridoy - From the Heart of Bengal" className="h-12 md:h-16 w-auto" />
             </Link>
 
-            {/* Search Bar - Desktop */}
-            <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            {/* Search Bar - Desktop with autocomplete */}
+            <div className="hidden md:flex flex-1 max-w-xl mx-8" ref={searchRef}>
               <div className="relative w-full">
-                <input
-                  type="text"
-                  placeholder="Search for products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-5 pr-12 py-3 rounded-xl border border-border bg-secondary/50 
-                           focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
-                           transition-all duration-200 text-base"
-                />
-                <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <form onSubmit={handleSearchSubmit}>
+                  <input
+                    type="text"
+                    placeholder="Search for products..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowSearchResults(true);
+                    }}
+                    onFocus={() => searchQuery.length >= 2 && setShowSearchResults(true)}
+                    className="w-full pl-5 pr-12 py-3 rounded-xl border border-border bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-base"
+                  />
+                  <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <Search className="h-5 w-5 text-muted-foreground" />
+                  </button>
+                </form>
+
+                {/* Search Autocomplete Dropdown */}
+                {showSearchResults && searchQuery.length >= 2 && (
+                  <div className="absolute top-full mt-2 left-0 right-0 bg-card border border-border rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto">
+                    {isSearching ? (
+                      <div className="p-4 text-center text-muted-foreground">
+                        <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                      </div>
+                    ) : searchResults ? (
+                      <>
+                        {searchResults.products?.length > 0 && (
+                          <div className="p-3">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Products</p>
+                            {searchResults.products.slice(0, 5).map((product) => (
+                              <Link
+                                key={product.id}
+                                to={`/product/${product.slug}`}
+                                className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary transition-colors"
+                                onClick={() => setShowSearchResults(false)}
+                              >
+                                {product.images?.[0] && (
+                                  <img src={product.images[0].url} alt="" className="w-10 h-10 rounded object-cover" loading="lazy" />
+                                )}
+                                <div>
+                                  <p className="text-sm font-medium line-clamp-1">{product.name}</p>
+                                  <p className="text-xs text-muted-foreground">₹{product.price}</p>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                        {searchResults.categories?.length > 0 && (
+                          <div className="p-3 border-t border-border">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Categories</p>
+                            {searchResults.categories.map((cat) => (
+                              <Link
+                                key={cat.id}
+                                to={`/category/${cat.slug}`}
+                                className="block p-2 text-sm rounded-lg hover:bg-secondary transition-colors"
+                                onClick={() => setShowSearchResults(false)}
+                              >
+                                {cat.name}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                        {(!searchResults.products?.length && !searchResults.categories?.length) && (
+                          <p className="p-4 text-sm text-muted-foreground text-center">No results found</p>
+                        )}
+                      </>
+                    ) : null}
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Desktop Nav */}
             <nav className="hidden lg:flex items-center gap-1">
               {navLinks.slice(0, 3).map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === link.path
-                      ? 'text-primary'
-                      : 'text-foreground/80 hover:text-foreground hover:bg-secondary/50'
-                  }`}
-                >
+                <Link key={link.path} to={link.path} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === link.path ? 'text-primary' : 'text-foreground/80 hover:text-foreground hover:bg-secondary/50'}`}>
                   {link.name}
                 </Link>
               ))}
-              
-              {/* Categories Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-secondary/50 transition-colors">
@@ -236,26 +271,15 @@ export default function Header() {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="center" className="w-56">
-                  {categories.map((cat) => (
+                  {CATEGORIES.map((cat) => (
                     <DropdownMenuItem key={cat.slug} asChild>
-                      <Link to={`/category/${cat.slug}`} className="cursor-pointer">
-                        {cat.name}
-                      </Link>
+                      <Link to={`/category/${cat.slug}`} className="cursor-pointer">{cat.name}</Link>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-
               {navLinks.slice(3).map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === link.path
-                      ? 'text-primary'
-                      : 'text-foreground/80 hover:text-foreground hover:bg-secondary/50'
-                  }`}
-                >
+                <Link key={link.path} to={link.path} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === link.path ? 'text-primary' : 'text-foreground/80 hover:text-foreground hover:bg-secondary/50'}`}>
                   {link.name}
                 </Link>
               ))}
@@ -263,25 +287,15 @@ export default function Header() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-2">
-              {/* Mobile Search */}
               <Button variant="ghost" size="icon" className="md:hidden touch-target">
                 <Search className="h-5 w-5" />
               </Button>
-
-              {/* Account */}
               <Link to={isAuthenticated ? '/account' : '/login'}>
                 <Button variant="ghost" size="icon" className="touch-target">
                   <User className="h-5 w-5" />
                 </Button>
               </Link>
-
-              {/* Cart */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="touch-target relative"
-                onClick={() => setIsCartOpen(true)}
-              >
+              <Button variant="ghost" size="icon" className="touch-target relative" onClick={() => setIsCartOpen(true)}>
                 <ShoppingCart className="h-5 w-5" />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs font-semibold flex items-center justify-center">
@@ -294,7 +308,6 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Mini Cart Drawer */}
       <MiniCart />
     </>
   );

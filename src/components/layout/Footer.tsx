@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Facebook, Instagram, Youtube, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { CATEGORIES } from '@/data/categories';
 import logo from '@/assets/logo.png';
 
 // X (Twitter) icon component
@@ -25,22 +26,15 @@ export default function Footer() {
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      toast.error('Please enter a valid email address');
-      return;
-    }
-
+    if (!email || !/\S+@\S+\.\S+/.test(email)) { toast.error('Please enter a valid email address'); return; }
     setIsSubscribing(true);
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    toast.success('Successfully subscribed! Check your inbox for updates.');
+    toast.success('Successfully subscribed!');
     setEmail('');
     setIsSubscribing(false);
   };
 
   const currentYear = new Date().getFullYear();
-
   const socialLinks = [
     { name: 'Facebook', icon: Facebook, url: 'https://facebook.com/bongohridoy' },
     { name: 'Instagram', icon: Instagram, url: 'https://instagram.com/bongohridoy' },
@@ -51,151 +45,83 @@ export default function Footer() {
 
   return (
     <footer className="bg-foreground text-background">
-      {/* Newsletter Section */}
       <div className="border-b border-background/10">
         <div className="section-container py-12">
           <div className="max-w-2xl mx-auto text-center">
-            <h3 className="font-display text-2xl md:text-3xl font-semibold mb-3">
-              Stay Connected with Bengal
-            </h3>
-            <p className="text-background/70 mb-6">
-              Get exclusive offers, new product updates, and authentic Bengali recipes delivered to your inbox.
-            </p>
+            <h3 className="font-display text-2xl md:text-3xl font-semibold mb-3">Stay Connected with Bengal</h3>
+            <p className="text-background/70 mb-6">Get exclusive offers, new product updates, and authentic Bengali recipes.</p>
             <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-3 rounded-xl bg-background/10 border border-background/20 
-                         text-background placeholder:text-background/50
-                         focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
-                         transition-all duration-200"
-              />
-              <Button 
-                type="submit" 
-                disabled={isSubscribing}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground touch-target"
-              >
-                {isSubscribing ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  'Subscribe'
-                )}
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" className="flex-1 px-4 py-3 rounded-xl bg-background/10 border border-background/20 text-background placeholder:text-background/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" />
+              <Button type="submit" disabled={isSubscribing} className="bg-primary hover:bg-primary/90 text-primary-foreground touch-target">
+                {isSubscribing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Subscribe'}
               </Button>
             </form>
           </div>
         </div>
       </div>
 
-      {/* Main Footer */}
       <div className="section-container py-12 md:py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
-          {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="inline-block">
               <img src={logo} alt="Bongo Hridoy" className="h-12 w-12 rounded-full object-cover mb-1" />
               <p className="text-xs text-background/60">From the Heart of Bengal</p>
             </Link>
-            <p className="mt-4 text-sm text-background/70 leading-relaxed">
-              Bringing authentic Bengali flavors to your doorstep. From traditional sweets to homemade pickles,
-              we deliver the taste of Bengal worldwide.
-            </p>
+            <p className="mt-4 text-sm text-background/70 leading-relaxed">Bringing authentic Bengali flavors to your doorstep worldwide.</p>
             <div className="flex gap-3 mt-6">
               {socialLinks.map((social) => (
-                <a
-                  key={social.name}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
-                  aria-label={social.name}
-                >
+                <a key={social.name} href={social.url} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors" aria-label={social.name}>
                   <social.icon className="h-5 w-5" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4 text-background/90">
-              Quick Links
-            </h4>
+            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4 text-background/90">Quick Links</h4>
             <ul className="space-y-3">
               {['Home', 'Shop', 'Our Story', 'Blogs', 'Contact', 'Track Your Order'].map((link) => (
                 <li key={link}>
-                  <Link
-                    to={link === 'Track Your Order' ? '/track-order' : `/${link.toLowerCase().replace(' ', '-')}`}
-                    className="text-sm text-background/70 hover:text-primary transition-colors"
-                  >
-                    {link}
-                  </Link>
+                  <Link to={link === 'Track Your Order' ? '/account/orders' : `/${link.toLowerCase().replace(/ /g, '-')}`} className="text-sm text-background/70 hover:text-primary transition-colors">{link}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Categories */}
           <div>
-            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4 text-background/90">
-              Categories
-            </h4>
+            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4 text-background/90">Categories</h4>
             <ul className="space-y-3">
-              {[
-                'Snacks & Pickles',
-                'Sweets & Mishti',
-                'Dal & Rice',
-                'Puja Samogri',
-                'Oil & Ghee',
-              ].map((cat) => (
-                <li key={cat}>
-                  <Link
-                    to="/shop"
-                    className="text-sm text-background/70 hover:text-primary transition-colors"
-                  >
-                    {cat}
-                  </Link>
+              {CATEGORIES.slice(0, 6).map((cat) => (
+                <li key={cat.slug}>
+                  <Link to={`/category/${cat.slug}`} className="text-sm text-background/70 hover:text-primary transition-colors">{cat.name}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
-            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4 text-background/90">
-              Contact Us
-            </h4>
+            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4 text-background/90">Contact Us</h4>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <Phone className="h-4 w-4 text-primary mt-0.5" />
                 <div>
-                  <a href="tel:+913368263382" className="text-sm text-background/70 hover:text-primary transition-colors block">
-                    +91 33-68263382
-                  </a>
-                  <a href="tel:+919330396636" className="text-sm text-background/70 hover:text-primary transition-colors block">
-                    +91 9330396636
-                  </a>
+                  <a href="tel:+913368263382" className="text-sm text-background/70 hover:text-primary transition-colors block">+91 33-68263382</a>
+                  <a href="tel:+919330396636" className="text-sm text-background/70 hover:text-primary transition-colors block">+91 9330396636</a>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="h-4 w-4 text-primary mt-0.5" />
-                <a href="mailto:info@bongohridoy.com" className="text-sm text-background/70 hover:text-primary transition-colors">
-                  info@bongohridoy.com
-                </a>
+                <a href="mailto:info@bongohridoy.com" className="text-sm text-background/70 hover:text-primary transition-colors">info@bongohridoy.com</a>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin className="h-4 w-4 text-primary mt-0.5" />
-                <span className="text-sm text-background/70">
-                  Kolkata, West Bengal, India
-                </span>
+                <span className="text-sm text-background/70">Kolkata, West Bengal, India</span>
               </li>
             </ul>
           </div>
         </div>
       </div>
 
-      {/* Bottom Bar */}
       <div className="border-t border-background/10">
         <div className="section-container py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-background/60">
