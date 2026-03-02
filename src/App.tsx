@@ -16,8 +16,10 @@ import Account from "./pages/Account";
 import Profile from "./pages/account/Profile";
 import Orders from "./pages/account/Orders";
 import Addresses from "./pages/account/Addresses";
+import Wishlist from "./pages/account/Wishlist";
 import Contact from "./pages/Contact";
 import Blogs from "./pages/Blogs";
+import BlogDetail from "./pages/BlogDetail";
 import OurStory from "./pages/OurStory";
 import NotFound from "./pages/NotFound";
 import { AdminLayout } from "./components/admin/AdminLayout";
@@ -48,8 +50,10 @@ const App = () => (
                 <Route path="/account/profile" element={<Profile />} />
                 <Route path="/account/orders" element={<Orders />} />
                 <Route path="/account/addresses" element={<Addresses />} />
+                <Route path="/account/wishlist" element={<Wishlist />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/blogs" element={<Blogs />} />
+                <Route path="/blog/:slug" element={<BlogDetail />} />
                 <Route path="/our-story" element={<OurStory />} />
                 
                 {/* Admin Routes */}
