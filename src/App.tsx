@@ -65,6 +65,9 @@ const App = () => (
                   <Route path="products" element={<AdminProducts />} />
                   <Route path="products/new" element={<AdminProductForm />} />
                   <Route path="products/:id" element={<AdminProductForm />} />
+                  <Route path="blogs" element={<AdminBlogs />} />
+                  <Route path="blogs/new" element={<AdminBlogForm />} />
+                  <Route path="blogs/:id" element={<AdminBlogForm />} />
                 </Route>
                 
                 <Route path="*" element={<NotFound />} />
