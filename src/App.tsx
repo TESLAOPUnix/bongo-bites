@@ -26,6 +26,8 @@ import { AdminLayout } from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminProductForm from "./pages/admin/AdminProductForm";
+import AdminBlogs from "./pages/admin/AdminBlogs";
+import AdminBlogForm from "./pages/admin/AdminBlogForm";
 
 const queryClient = new QueryClient();
 
