@@ -101,7 +101,9 @@ export interface Blog {
   seo_title?: string;
   meta_description?: string;
   read_time?: string;
+  is_published: boolean;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface DeliveryCheck {
