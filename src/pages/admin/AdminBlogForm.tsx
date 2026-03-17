@@ -249,7 +249,7 @@ export default function AdminBlogForm() {
               <p className="text-xs text-muted-foreground">
                 {form.is_published
                   ? 'This post will be visible on the blog page.'
-                  : 'This post is saved as a draft and won't be visible.'}
+                  : "This post is saved as a draft and won't be visible."}
               </p>
             </CardContent>
           </Card>
